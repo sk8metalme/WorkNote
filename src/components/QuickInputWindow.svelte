@@ -2,6 +2,7 @@
   import { validateTitle, validateCategory, validateSeverity } from '$lib/validation';
   import type { Category, Severity } from '$lib/types';
   import { goto } from '$app/navigation';
+  import { quickSaveKnowledge, hideQuickInputWindow } from '$lib/tauri-bridge';
 
   let title = '';
   let category: Category | undefined = undefined;
@@ -40,29 +41,33 @@
 
     saving = true;
     try {
-      // TODO: Implement quick save (TASK-205)
-      alert('クイック保存は次のタスクで実装します');
+      const result = await quickSaveKnowledge(title, category!, severity!);
 
-      // Clear form
-      title = '';
-      category = undefined;
-      severity = undefined;
+      if (result.success) {
+        // Clear form
+        title = '';
+        category = undefined;
+        severity = undefined;
+        errors = {};
 
-      // Close window (hide)
-      // TODO: Implement window close command
+        // Close window (hide)
+        await hideQuickInputWindow();
+      } else {
+        errors.save = result.error || '保存に失敗しました';
+      }
     } catch (e: any) {
-      errors.save = e.message;
+      errors.save = e.message || '保存中にエラーが発生しました';
     } finally {
       saving = false;
     }
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
+  async function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleQuickSave();
     } else if (event.key === 'Escape') {
-      // TODO: Implement window close command
+      await hideQuickInputWindow();
     }
   }
 </script>

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { KnowledgeInput, Config, SaveKnowledgeResponse } from './types';
+import type { KnowledgeInput, Config, SaveKnowledgeResponse, Category, Severity } from './types';
 
 /**
  * ナレッジを保存
@@ -31,4 +31,44 @@ export async function loadConfig(): Promise<Config> {
  */
 export async function saveConfig(config: Config): Promise<void> {
   await invoke('save_config', { config });
+}
+
+/**
+ * クイック保存（タイトル、カテゴリ、重要度のみ）
+ */
+export async function quickSaveKnowledge(
+  title: string,
+  category: Category,
+  severity: Severity
+): Promise<SaveKnowledgeResponse> {
+  try {
+    const commitHash = await invoke<string>('quick_save_knowledge', {
+      title,
+      category,
+      severity
+    });
+    return {
+      success: true,
+      commitHash
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Quick-inputウィンドウを表示
+ */
+export async function showQuickInputWindow(): Promise<void> {
+  await invoke('show_quick_input_window');
+}
+
+/**
+ * Quick-inputウィンドウを非表示
+ */
+export async function hideQuickInputWindow(): Promise<void> {
+  await invoke('hide_quick_input_window');
 }

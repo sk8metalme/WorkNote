@@ -25,6 +25,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             commands::knowledge::save_knowledge,
+            commands::knowledge::quick_save_knowledge,
             commands::config::load_config,
             commands::config::save_config,
             commands::window::show_quick_input_window,

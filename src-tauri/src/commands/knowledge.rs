@@ -1,4 +1,4 @@
-use crate::models::{ErrorInfo, KnowledgeInput};
+use crate::models::{Category, ErrorInfo, KnowledgeInput, Severity};
 use crate::services::{ConfigManager, FileGenerator, GitService};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
@@ -48,4 +48,26 @@ pub async fn save_knowledge(
         .map_err(ErrorInfo::from)?;
 
     Ok(commit_hash)
+}
+
+#[tauri::command]
+pub async fn quick_save_knowledge(
+    app: AppHandle,
+    title: String,
+    category: Category,
+    severity: Severity,
+) -> std::result::Result<String, ErrorInfo> {
+    // Create minimal KnowledgeInput with only required fields
+    let input = KnowledgeInput {
+        title,
+        category,
+        severity,
+        symptoms: String::new(),
+        procedure: String::new(),
+        notes: None,
+        related_links: None,
+    };
+
+    // Reuse save_knowledge logic
+    save_knowledge(app, input).await
 }

@@ -14,9 +14,17 @@
 </script>
 
 {#if error}
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-      <h2 class="text-xl font-bold text-red-600 mb-4">エラーが発生しました</h2>
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    role="presentation"
+  >
+    <div
+      class="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+      role="dialog"
+      aria-labelledby="error-dialog-title"
+      aria-modal="true"
+    >
+      <h2 id="error-dialog-title" class="text-xl font-bold text-red-600 mb-4">エラーが発生しました</h2>
 
       <div class="mb-4">
         <p class="text-gray-700 font-semibold mb-2">{error.type}</p>

@@ -25,6 +25,22 @@ impl FileGenerator {
         }
     }
 
+    /// YAML文字列をエスケープ
+    ///
+    /// ダブルクォート、バックスラッシュ、改行をエスケープします。
+    ///
+    /// # Arguments
+    /// * `s` - エスケープする文字列
+    ///
+    /// # Returns
+    /// エスケープされた文字列
+    fn escape_yaml_string(s: &str) -> String {
+        s.replace('\\', "\\\\")
+            .replace('"', "\\\"")
+            .replace('\n', "\\n")
+            .replace('\r', "\\r")
+    }
+
     /// タイトルをkebab-caseに変換
     ///
     /// ASCII文字（英数字）のみを残し、スペースと記号をハイフンに置換します。
@@ -95,14 +111,14 @@ impl FileGenerator {
 
         // Frontmatter
         content.push_str("---\n");
-        content.push_str(&format!("title: \"{}\"\n", input.title));
+        content.push_str(&format!("title: \"{}\"\n", Self::escape_yaml_string(&input.title)));
         content.push_str(&format!("category: {}\n", input.category.as_str()));
         content.push_str(&format!("severity: {}\n", input.severity.as_str()));
         content.push_str("symptoms:\n");
-        content.push_str(&format!("  - \"{}\"\n", input.symptoms));
+        content.push_str(&format!("  - \"{}\"\n", Self::escape_yaml_string(&input.symptoms)));
         content.push_str("related_alerts: []\n");
         content.push_str(&format!("last_updated: {}\n", today));
-        content.push_str(&format!("author: \"{}\"\n", self.author_name));
+        content.push_str(&format!("author: \"{}\"\n", Self::escape_yaml_string(&self.author_name)));
         content.push_str("---\n\n");
 
         // タイトル
@@ -162,6 +178,42 @@ impl FileGenerator {
             .repository_path
             .join(&self.save_path)
             .join(input.category.as_str());
+
+        // ディレクトリトラバーサル対策: repository_path 内に収まるか確認
+        // まず必要なディレクトリを作成
+        let save_dir = self.repository_path.join(&self.save_path);
+        if !save_dir.exists() {
+            fs::create_dir_all(&save_dir).map_err(|e| {
+                WorkNoteError::FileError(format!("Failed to create save directory: {}", e))
+            })?;
+        }
+
+        // repository_pathとcategory_dirをcanonicalizeして比較
+        // repository_pathが存在しない場合は作成
+        if !self.repository_path.exists() {
+            fs::create_dir_all(&self.repository_path).map_err(|e| {
+                WorkNoteError::FileError(format!("Failed to create repository directory: {}", e))
+            })?;
+        }
+
+        let canonical_repo = self.repository_path.canonicalize().map_err(|e| {
+            WorkNoteError::FileError(format!("Failed to canonicalize repository path: {}", e))
+        })?;
+
+        let canonical_category = category_dir.canonicalize().unwrap_or_else(|_| {
+            // まだ存在しない場合は、親ディレクトリをベースに構築
+            save_dir
+                .canonicalize()
+                .unwrap_or(save_dir.clone())
+                .join(input.category.as_str())
+        });
+
+        // リポジトリパス外への書き込みを防止
+        if !canonical_category.starts_with(&canonical_repo) {
+            return Err(WorkNoteError::FileError(
+                "Invalid save path: directory traversal detected".to_string(),
+            ));
+        }
 
         // ディレクトリが存在しない場合は作成
         if !category_dir.exists() {

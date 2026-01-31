@@ -78,7 +78,7 @@
    - Git認証エラー時のエラー表示
    - ネットワークエラー時のリトライ・下書き保存
 
-**ツール**: Playwright（Tauriアプリ対応）
+**ツール**: WebDriver（tauri-driver）またはPlaywright with Tauri plugin
 
 **カバレッジ目標**: 主要シナリオ100%
 

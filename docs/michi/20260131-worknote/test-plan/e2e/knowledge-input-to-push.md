@@ -54,7 +54,7 @@
 **期待結果**:
 
 1. **Markdownファイル生成**
-   - `{リポジトリパス}/docs/runbooks/alerts/cpu-gao-teng-dui-ying.md` が作成される
+   - `{リポジトリパス}/docs/runbooks/alerts/cpu.md` が作成される（日本語文字は除去され、ASCII英数字のみが残る）
 
 2. **ファイル内容**
    ```markdown
@@ -130,7 +130,7 @@ test('TC-E2E-001: ナレッジ入力→直接Push（正常系）', async ({ page
 
   // ファイル生成確認（バックエンドテスト）
   const fs = require('fs');
-  const filePath = `${TEST_REPO_PATH}/docs/runbooks/alerts/cpu-gao-teng-dui-ying.md`;
+  const filePath = `${TEST_REPO_PATH}/docs/runbooks/alerts/cpu.md`;
   expect(fs.existsSync(filePath)).toBe(true);
 
   // ファイル内容確認

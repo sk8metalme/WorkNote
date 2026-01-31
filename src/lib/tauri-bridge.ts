@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { KnowledgeInput, Config, SaveKnowledgeResponse, AppError } from './types';
+import type { KnowledgeInput, Config, SaveKnowledgeResponse } from './types';
 
 /**
  * ナレッジを保存
@@ -9,10 +9,7 @@ export async function saveKnowledge(input: KnowledgeInput): Promise<SaveKnowledg
     const commitHash = await invoke<string>('save_knowledge', { input });
     return {
       success: true,
-      commitHash,
-      filePath: undefined,
-      branch: undefined,
-      error: undefined
+      commitHash
     };
   } catch (error: any) {
     return {

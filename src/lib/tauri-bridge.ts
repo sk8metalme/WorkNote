@@ -84,3 +84,10 @@ export async function showQuickInputWindow(): Promise<void> {
 export async function hideQuickInputWindow(): Promise<void> {
   await invoke('hide_quick_input_window');
 }
+
+/**
+ * MarkdownをHTMLにレンダリング
+ */
+export async function renderMarkdown(input: KnowledgeInput): Promise<string> {
+  return invoke<string>('render_markdown', { input });
+}

@@ -1,4 +1,4 @@
-use crate::models::{Category, ErrorInfo, KnowledgeInput, Severity};
+use crate::models::{Category, CommitMode, ErrorInfo, KnowledgeInput, SaveKnowledgeResponse, Severity};
 use crate::services::{ConfigManager, FileGenerator, GitService};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
@@ -7,7 +7,7 @@ use tauri::{AppHandle, Manager};
 pub async fn save_knowledge(
     app: AppHandle,
     input: KnowledgeInput,
-) -> std::result::Result<String, ErrorInfo> {
+) -> std::result::Result<SaveKnowledgeResponse, ErrorInfo> {
     // ConfigManager初期化
     let app_data_dir = app
         .path()
@@ -37,17 +37,37 @@ pub async fn save_knowledge(
     // Markdownファイル生成
     let file_path = file_generator.write_file(&input).map_err(ErrorInfo::from)?;
 
-    // Git commit & push
-    let commit_hash = git_service
-        .commit_and_push(
-            &file_path,
-            &input.title,
-            input.category.as_str(),
-            input.severity.as_str(),
-        )
-        .map_err(ErrorInfo::from)?;
+    // CommitModeに応じてGit操作を分岐
+    let (commit_hash, pr_url) = match config.git.commit_mode {
+        CommitMode::Direct => {
+            let hash = git_service
+                .commit_and_push(
+                    &file_path,
+                    &input.title,
+                    input.category.as_str(),
+                    input.severity.as_str(),
+                )
+                .map_err(ErrorInfo::from)?;
+            (hash, None)
+        }
+        CommitMode::FeatureBranch => {
+            let (hash, url) = git_service
+                .commit_and_push_pr(
+                    &file_path,
+                    &input.title,
+                    input.category.as_str(),
+                    input.severity.as_str(),
+                )
+                .map_err(ErrorInfo::from)?;
+            (hash, Some(url))
+        }
+    };
 
-    Ok(commit_hash)
+    Ok(SaveKnowledgeResponse {
+        commit_hash,
+        file_path: file_path.to_string_lossy().to_string(),
+        pr_url,
+    })
 }
 
 #[tauri::command]
@@ -56,7 +76,7 @@ pub async fn quick_save_knowledge(
     title: String,
     category: Category,
     severity: Severity,
-) -> std::result::Result<String, ErrorInfo> {
+) -> std::result::Result<SaveKnowledgeResponse, ErrorInfo> {
     // Create minimal KnowledgeInput with only required fields
     let input = KnowledgeInput {
         title,

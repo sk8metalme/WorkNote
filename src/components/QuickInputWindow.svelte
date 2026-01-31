@@ -44,6 +44,11 @@
       const result = await quickSaveKnowledge(title, category!, severity!);
 
       if (result.success) {
+        // Show success message with PR URL if available
+        if (result.prUrl) {
+          alert(`保存に成功しました\n\nPR作成URL:\n${result.prUrl}`);
+        }
+
         // Clear form
         title = '';
         category = undefined;

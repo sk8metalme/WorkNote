@@ -32,7 +32,11 @@
     try {
       const result = await saveKnowledge(input as KnowledgeInput);
       if (result.success) {
-        alert('保存に成功しました');
+        let message = '保存に成功しました';
+        if (result.prUrl) {
+          message += `\n\nPR作成URL:\n${result.prUrl}`;
+        }
+        alert(message);
         // フォームクリア
         input = { title: '', category: undefined, severity: undefined, symptoms: '', procedure: '', notes: '', relatedLinks: '' };
       } else {

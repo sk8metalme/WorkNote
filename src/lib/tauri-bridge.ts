@@ -6,10 +6,16 @@ import type { KnowledgeInput, Config, SaveKnowledgeResponse, Category, Severity 
  */
 export async function saveKnowledge(input: KnowledgeInput): Promise<SaveKnowledgeResponse> {
   try {
-    const commitHash = await invoke<string>('save_knowledge', { input });
+    const result = await invoke<{
+      commitHash: string;
+      filePath: string;
+      prUrl?: string;
+    }>('save_knowledge', { input });
     return {
       success: true,
-      commitHash
+      commitHash: result.commitHash,
+      filePath: result.filePath,
+      prUrl: result.prUrl
     };
   } catch (error: any) {
     return {
@@ -42,14 +48,20 @@ export async function quickSaveKnowledge(
   severity: Severity
 ): Promise<SaveKnowledgeResponse> {
   try {
-    const commitHash = await invoke<string>('quick_save_knowledge', {
+    const result = await invoke<{
+      commitHash: string;
+      filePath: string;
+      prUrl?: string;
+    }>('quick_save_knowledge', {
       title,
       category,
       severity
     });
     return {
       success: true,
-      commitHash
+      commitHash: result.commitHash,
+      filePath: result.filePath,
+      prUrl: result.prUrl
     };
   } catch (error: any) {
     return {

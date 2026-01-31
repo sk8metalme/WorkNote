@@ -60,6 +60,30 @@
         <input type="email" bind:value={config.author.email} class="w-full border rounded px-3 py-2" required />
       </div>
 
+      <div>
+        <label class="block text-sm font-medium mb-2">コミットモード</label>
+        <div class="space-y-2">
+          <label class="flex items-center">
+            <input
+              type="radio"
+              bind:group={config.git.commitMode}
+              value="direct"
+              class="mr-2"
+            />
+            <span class="text-sm">直接Push（デフォルトブランチに直接）</span>
+          </label>
+          <label class="flex items-center">
+            <input
+              type="radio"
+              bind:group={config.git.commitMode}
+              value="feature-branch"
+              class="mr-2"
+            />
+            <span class="text-sm">PR作成（featureブランチを作成）</span>
+          </label>
+        </div>
+      </div>
+
       <button type="submit" disabled={saving} class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
         {saving ? '保存中...' : '保存'}
       </button>

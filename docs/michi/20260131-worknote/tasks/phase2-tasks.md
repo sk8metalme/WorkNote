@@ -28,7 +28,7 @@ Phase 2では13のタスクを実装します。タスクは依存関係に基�
 
    .plugin(tauri_plugin_global_shortcut::init())
    ```
-3. 初期設定で`CommandOrControl+Shift+K`を登録
+3. 初期設定で`CommandOrControl+J`を登録
 
 **受入条件:**
 - [ ] Cargo.tomlに依存が追加されている

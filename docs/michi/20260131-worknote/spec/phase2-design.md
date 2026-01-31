@@ -70,7 +70,7 @@ Phase 2では2つのウィンドウを管理します：
    tauri-plugin-global-shortcut = "2.0.0"
    ```
 2. `src-tauri/src/lib.rs`でプラグイン登録
-3. 初期設定で`CommandOrControl+Shift+K`を登録
+3. 初期設定で`CommandOrControl+J`を登録
 
 **テスト:**
 - グローバルショートカットが他アプリフォーカス時でも動作するか
@@ -311,7 +311,7 @@ sequenceDiagram
     participant TauriApp
     participant QuickInputWindow
 
-    User->>OS: ⌘ + Shift + K を押下
+    User->>OS: ⌘ + J を押下
     OS->>ShortcutManager: ショートカットイベント発火
     ShortcutManager->>TauriApp: show_quick_input_window()
     TauriApp->>QuickInputWindow: ウィンドウ表示
@@ -420,7 +420,7 @@ pub struct ShortcutConfig {
 }
 
 fn default_quick_input_shortcut() -> String {
-    "CommandOrControl+Shift+K".to_string()
+    "CommandOrControl+J".to_string()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

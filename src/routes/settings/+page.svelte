@@ -1,26 +1,27 @@
 <script lang="ts">
-  import DetailInputWindow from '$lib/../components/DetailInputWindow.svelte';
+  import SettingsWindow from '$lib/../components/SettingsWindow.svelte';
   import { goto } from '$app/navigation';
 
-  function openSettings() {
-    goto('/settings');
+  function goBack() {
+    goto('/');
   }
 </script>
 
 <div class="min-h-screen bg-gray-50">
   <header class="bg-white shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold text-gray-900">WorkNote</h1>
       <button
-        on:click={openSettings}
+        on:click={goBack}
         class="text-sm text-blue-600 hover:text-blue-700"
       >
-        ⚙️ 設定
+        ← 戻る
       </button>
+      <h1 class="text-xl font-bold text-gray-900">設定</h1>
+      <div class="w-16"></div>
     </div>
   </header>
 
   <main>
-    <DetailInputWindow />
+    <SettingsWindow />
   </main>
 </div>

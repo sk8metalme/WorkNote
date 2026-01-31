@@ -26,7 +26,9 @@ pub fn run() {
             greet,
             commands::knowledge::save_knowledge,
             commands::config::load_config,
-            commands::config::save_config
+            commands::config::save_config,
+            commands::window::show_quick_input_window,
+            commands::window::hide_quick_input_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

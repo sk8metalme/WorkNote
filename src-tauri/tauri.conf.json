@@ -12,9 +12,23 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
+        "label": "main",
+        "title": "WorkNote",
         "width": 800,
         "height": 600
+      },
+      {
+        "label": "quick-input",
+        "title": "WorkNote - クイック入力",
+        "url": "/quick-input",
+        "width": 480,
+        "height": 320,
+        "resizable": false,
+        "center": true,
+        "alwaysOnTop": true,
+        "visible": false,
+        "decorations": true,
+        "transparent": false
       }
     ],
     "security": {

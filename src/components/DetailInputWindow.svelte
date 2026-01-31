@@ -7,8 +7,8 @@
 
   let input = $state<Partial<KnowledgeInput>>({
     title: '',
-    category: undefined,
-    severity: undefined,
+    category: '' as any,
+    severity: '' as any,
     symptoms: '',
     procedure: '',
     notes: '',

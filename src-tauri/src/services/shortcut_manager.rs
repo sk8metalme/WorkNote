@@ -11,10 +11,45 @@ impl ShortcutManager {
         Self { app }
     }
 
+    /// Parse shortcut string into Shortcut struct
+    /// Supports formats like "CommandOrControl+J", "Super+J", etc.
+    fn parse_shortcut(shortcut_str: &str) -> Result<Shortcut> {
+        let parts: Vec<&str> = shortcut_str.split('+').collect();
+        if parts.len() != 2 {
+            return Err(WorkNoteError::ShortcutError(
+                format!("Invalid shortcut format: {}. Expected format: 'Modifier+Key'", shortcut_str)
+            ));
+        }
+
+        let modifier = match parts[0].to_lowercase().as_str() {
+            "commandorcontrol" | "super" | "cmd" => Some(Modifiers::SUPER),
+            "ctrl" | "control" => Some(Modifiers::CONTROL),
+            "alt" | "option" => Some(Modifiers::ALT),
+            "shift" => Some(Modifiers::SHIFT),
+            _ => return Err(WorkNoteError::ShortcutError(
+                format!("Unknown modifier: {}", parts[0])
+            )),
+        };
+
+        let code = match parts[1].to_uppercase().as_str() {
+            "J" => Code::KeyJ,
+            "K" => Code::KeyK,
+            "L" => Code::KeyL,
+            "N" => Code::KeyN,
+            "M" => Code::KeyM,
+            // Add more keys as needed
+            _ => return Err(WorkNoteError::ShortcutError(
+                format!("Unknown key code: {}", parts[1])
+            )),
+        };
+
+        Ok(Shortcut::new(modifier, code))
+    }
+
     /// Register a global shortcut and set up the event handler
-    pub fn register_shortcut(&self, shortcut: &str) -> Result<()> {
+    pub fn register_shortcut(&self, shortcut_str: &str) -> Result<()> {
         // Parse shortcut string (e.g., "CommandOrControl+J")
-        let shortcut = Shortcut::new(Some(Modifiers::SUPER), Code::KeyJ);
+        let shortcut = Self::parse_shortcut(shortcut_str)?;
 
         // Register the shortcut
         self.app
@@ -44,8 +79,8 @@ impl ShortcutManager {
     }
 
     /// Unregister the current shortcut
-    pub fn unregister_shortcut(&self) -> Result<()> {
-        let shortcut = Shortcut::new(Some(Modifiers::SUPER), Code::KeyJ);
+    pub fn unregister_shortcut(&self, shortcut_str: &str) -> Result<()> {
+        let shortcut = Self::parse_shortcut(shortcut_str)?;
 
         self.app
             .global_shortcut()

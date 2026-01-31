@@ -174,7 +174,14 @@ impl GitService {
             .collect::<Vec<_>>()
             .join("-");
 
-        format!("feature/worknote-{}-{}", sanitized, timestamp)
+        // 日本語タイトルなど、ASCII文字がない場合は"knowledge"をデフォルトとして使用
+        let prefix = if sanitized.is_empty() {
+            "knowledge"
+        } else {
+            &sanitized
+        };
+
+        format!("feature/worknote-{}-{}", prefix, timestamp)
     }
 
     /// PR作成モード: featureブランチにコミット＆プッシュ

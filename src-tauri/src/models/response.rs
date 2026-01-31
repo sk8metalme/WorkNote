@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveKnowledgeResponse {
+    pub success: bool,
     pub commit_hash: String,
     pub file_path: String,
     #[serde(skip_serializing_if = "Option::is_none")]

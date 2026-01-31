@@ -70,7 +70,7 @@
   async function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleQuickSave();
+      await handleQuickSave();
     } else if (event.key === 'Escape') {
       await hideQuickInputWindow();
     }

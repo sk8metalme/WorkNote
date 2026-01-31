@@ -64,6 +64,7 @@ pub async fn save_knowledge(
     };
 
     Ok(SaveKnowledgeResponse {
+        success: true,
         commit_hash,
         file_path: file_path.to_string_lossy().to_string(),
         pr_url,
@@ -82,8 +83,8 @@ pub async fn quick_save_knowledge(
         title,
         category,
         severity,
-        symptoms: String::new(),
-        procedure: String::new(),
+        symptoms: "(クイック保存のため未入力)".to_string(),
+        procedure: "(クイック保存のため未入力)".to_string(),
         notes: None,
         related_links: None,
     };

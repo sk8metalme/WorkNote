@@ -1,6 +1,6 @@
 use crate::models::{Result, WorkNoteError};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 /// GitService - Git操作を管理
 pub struct GitService {
@@ -22,6 +22,8 @@ impl GitService {
         let output = Command::new("git")
             .current_dir(&self.repository_path)
             .args(args)
+            .env("GIT_TERMINAL_PROMPT", "0")
+            .stdin(Stdio::null())
             .output()
             .map_err(|e| WorkNoteError::GitError(format!("Failed to execute git: {}", e)))?;
 
@@ -73,8 +75,13 @@ impl GitService {
         let relative_path = file_path.strip_prefix(&self.repository_path)
             .map_err(|e| WorkNoteError::FileError(format!("Invalid file path: {}", e)))?;
 
+        // 相対パスをUTF-8文字列に変換
+        let relative_path_str = relative_path
+            .to_str()
+            .ok_or_else(|| WorkNoteError::FileError("Invalid UTF-8 file path".to_string()))?;
+
         // Git add
-        self.execute_git(&["add", relative_path.to_str().unwrap()])?;
+        self.execute_git(&["add", relative_path_str])?;
 
         // コミットメッセージ生成
         let message = self.format_commit_message(title, category, severity);

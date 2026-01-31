@@ -28,6 +28,14 @@ pub enum WorkNoteError {
     #[error("Authentication error: {0}")]
     AuthError(String),
 
+    /// ショートカットエラー
+    #[error("Shortcut error: {0}")]
+    ShortcutError(String),
+
+    /// ウィンドウエラー
+    #[error("Window not found: {0}")]
+    WindowNotFoundError(String),
+
     /// I/Oエラー
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
@@ -55,6 +63,8 @@ impl From<WorkNoteError> for ErrorInfo {
             WorkNoteError::ConfigError(_) => "ConfigError",
             WorkNoteError::NetworkError(_) => "NetworkError",
             WorkNoteError::AuthError(_) => "AuthError",
+            WorkNoteError::ShortcutError(_) => "ShortcutError",
+            WorkNoteError::WindowNotFoundError(_) => "WindowNotFoundError",
             WorkNoteError::IoError(_) => "IoError",
             WorkNoteError::JsonError(_) => "JsonError",
         };

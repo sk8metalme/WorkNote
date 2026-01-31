@@ -22,7 +22,14 @@ impl ShortcutManager {
         }
 
         let modifier = match parts[0].to_lowercase().as_str() {
-            "commandorcontrol" | "super" | "cmd" => Some(Modifiers::SUPER),
+            "commandorcontrol" => {
+                // macOSではCommand、Windows/LinuxではControl
+                #[cfg(target_os = "macos")]
+                { Some(Modifiers::SUPER) }
+                #[cfg(not(target_os = "macos"))]
+                { Some(Modifiers::CONTROL) }
+            },
+            "super" | "cmd" => Some(Modifiers::SUPER),
             "ctrl" | "control" => Some(Modifiers::CONTROL),
             "alt" | "option" => Some(Modifiers::ALT),
             "shift" => Some(Modifiers::SHIFT),

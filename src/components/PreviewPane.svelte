@@ -20,7 +20,7 @@
 		<div class="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
 			<div class="animate-pulse">プレビュー生成中...</div>
 		</div>
-	{:else if htmlContent}
+	{:else if sanitizedHtml}
 		<article class="prose prose-slate dark:prose-invert max-w-none p-6">
 			{@html sanitizedHtml}
 		</article>

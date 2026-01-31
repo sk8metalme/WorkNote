@@ -229,6 +229,9 @@ impl GitService {
         // PR URL生成
         let pr_url = self.generate_pr_url(&branch_name)?;
 
+        // デフォルトブランチに戻す（次回のDirect modeで誤ったブランチに コミットしないため）
+        self.execute_git(&["checkout", &self.default_branch])?;
+
         Ok((hash.trim().to_string(), pr_url))
     }
 }

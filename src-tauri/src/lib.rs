@@ -1,4 +1,5 @@
 // Modules
+pub mod commands;
 pub mod models;
 pub mod services;
 
@@ -12,7 +13,12 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            commands::knowledge::save_knowledge,
+            commands::config::load_config,
+            commands::config::save_config
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

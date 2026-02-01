@@ -247,24 +247,41 @@ impl ProofreadService {
                 }
             })?;
 
+        // wait_timeout() を呼び出す前にパイプを取得
+        // （wait_timeout() がプロセスをreapするため、その後 wait_with_output() は ECHILD で失敗する）
+        let mut stdout = child.stdout.take().ok_or_else(|| {
+            WorkNoteError::ProofreadError("Failed to capture stdout".to_string())
+        })?;
+        let mut stderr = child.stderr.take().ok_or_else(|| {
+            WorkNoteError::ProofreadError("Failed to capture stderr".to_string())
+        })?;
+
         // タイムアウト付きでプロセスの完了を待つ
         match child.wait_timeout(self.timeout).map_err(|e| {
             WorkNoteError::ProofreadError(format!("Failed to wait for claude process: {}", e))
         })? {
             Some(status) => {
+                // プロセスが終了した場合、パイプから出力を読み取る
+                use std::io::Read;
+                let mut stdout_data = Vec::new();
+                let mut stderr_data = Vec::new();
+
+                stdout.read_to_end(&mut stdout_data).map_err(|e| {
+                    WorkNoteError::ProofreadError(format!("Failed to read stdout: {}", e))
+                })?;
+                stderr.read_to_end(&mut stderr_data).map_err(|e| {
+                    WorkNoteError::ProofreadError(format!("Failed to read stderr: {}", e))
+                })?;
+
                 if !status.success() {
+                    let stderr_str = String::from_utf8_lossy(&stderr_data);
                     return Err(WorkNoteError::ProofreadError(format!(
-                        "claude exited with status: {}",
-                        status
+                        "claude exited with status: {}\nstderr: {}",
+                        status, stderr_str
                     )));
                 }
 
-                // プロセスが正常終了した場合、出力を読み取る
-                let output = child.wait_with_output().map_err(|e| {
-                    WorkNoteError::ProofreadError(format!("Failed to read claude output: {}", e))
-                })?;
-
-                let result = String::from_utf8(output.stdout).map_err(|e| {
+                let result = String::from_utf8(stdout_data).map_err(|e| {
                     WorkNoteError::ProofreadError(format!("Failed to parse claude output: {}", e))
                 })?;
 
@@ -276,6 +293,13 @@ impl ProofreadService {
                     WorkNoteError::ProofreadError(format!("Failed to kill timed-out process: {}", e))
                 })?;
                 child.wait().ok(); // クリーンアップ
+
+                // パイプをクローズしてクリーンアップ
+                use std::io::Read;
+                let mut stdout_data = Vec::new();
+                let mut stderr_data = Vec::new();
+                stdout.read_to_end(&mut stdout_data).ok();
+                stderr.read_to_end(&mut stderr_data).ok();
 
                 Err(WorkNoteError::ProofreadError(format!(
                     "Claude CLI timed out after {} seconds. The operation took too long to complete.",

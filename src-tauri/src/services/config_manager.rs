@@ -105,27 +105,6 @@ impl ConfigManager {
             )));
         }
 
-        // Author名が空でないことを確認
-        if config.author.name.is_empty() {
-            return Err(WorkNoteError::ValidationError(
-                "Author name is empty".to_string(),
-            ));
-        }
-
-        // Authorメールが空でないことを確認
-        if config.author.email.is_empty() {
-            return Err(WorkNoteError::ValidationError(
-                "Author email is empty".to_string(),
-            ));
-        }
-
-        // メールアドレスの簡易バリデーション
-        if !config.author.email.contains('@') {
-            return Err(WorkNoteError::ValidationError(
-                "Invalid email address".to_string(),
-            ));
-        }
-
         Ok(())
     }
 }
@@ -166,8 +145,6 @@ mod tests {
 
         let mut config = Config::default();
         config.git.repository_path = test_repo.to_str().unwrap().to_string();
-        config.author.name = "Test User".to_string();
-        config.author.email = "test@example.com".to_string();
 
         // 保存
         manager.save_config(&config).unwrap();
@@ -176,8 +153,6 @@ mod tests {
         let loaded_config = manager.load_config().unwrap();
         assert_eq!(loaded_config.version, config.version);
         assert_eq!(loaded_config.git.repository_path, config.git.repository_path);
-        assert_eq!(loaded_config.author.name, config.author.name);
-        assert_eq!(loaded_config.author.email, config.author.email);
 
         // クリーンアップ
         let _ = fs::remove_dir_all(&test_repo);
@@ -187,9 +162,7 @@ mod tests {
     #[test]
     fn test_validate_config_empty_repository_path() {
         let manager = create_test_config_manager();
-        let mut config = Config::default();
-        config.author.name = "Test".to_string();
-        config.author.email = "test@example.com".to_string();
+        let config = Config::default();
 
         let result = manager.validate_config(&config);
         assert!(result.is_err());
@@ -206,8 +179,6 @@ mod tests {
         let manager = create_test_config_manager();
         let mut config = Config::default();
         config.git.repository_path = "/nonexistent/path".to_string();
-        config.author.name = "Test".to_string();
-        config.author.email = "test@example.com".to_string();
 
         let result = manager.validate_config(&config);
         assert!(result.is_err());
@@ -227,8 +198,6 @@ mod tests {
 
         let mut config = Config::default();
         config.git.repository_path = test_dir.to_str().unwrap().to_string();
-        config.author.name = "Test".to_string();
-        config.author.email = "test@example.com".to_string();
 
         let result = manager.validate_config(&config);
         assert!(result.is_err());
@@ -241,52 +210,5 @@ mod tests {
 
         // クリーンアップ
         let _ = fs::remove_dir_all(&test_dir);
-    }
-
-    #[test]
-    fn test_validate_config_empty_author_name() {
-        let manager = create_test_config_manager();
-        let test_repo = env::temp_dir().join("test_repo_2");
-        create_test_git_repo(&test_repo).unwrap();
-
-        let mut config = Config::default();
-        config.git.repository_path = test_repo.to_str().unwrap().to_string();
-        config.author.email = "test@example.com".to_string();
-
-        let result = manager.validate_config(&config);
-        assert!(result.is_err());
-        match result.unwrap_err() {
-            WorkNoteError::ValidationError(msg) => {
-                assert!(msg.contains("Author name is empty"));
-            }
-            _ => panic!("Expected ValidationError"),
-        }
-
-        // クリーンアップ
-        let _ = fs::remove_dir_all(&test_repo);
-    }
-
-    #[test]
-    fn test_validate_config_invalid_email() {
-        let manager = create_test_config_manager();
-        let test_repo = env::temp_dir().join("test_repo_3");
-        create_test_git_repo(&test_repo).unwrap();
-
-        let mut config = Config::default();
-        config.git.repository_path = test_repo.to_str().unwrap().to_string();
-        config.author.name = "Test".to_string();
-        config.author.email = "invalid-email".to_string();
-
-        let result = manager.validate_config(&config);
-        assert!(result.is_err());
-        match result.unwrap_err() {
-            WorkNoteError::ValidationError(msg) => {
-                assert!(msg.contains("Invalid email address"));
-            }
-            _ => panic!("Expected ValidationError"),
-        }
-
-        // クリーンアップ
-        let _ = fs::remove_dir_all(&test_repo);
     }
 }

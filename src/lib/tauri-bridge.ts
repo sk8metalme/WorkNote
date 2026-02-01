@@ -1,5 +1,15 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { KnowledgeInput, Config, SaveKnowledgeResponse, Category, Severity } from './types';
+import type { KnowledgeInput, Config, SaveKnowledgeResponse, Category, Severity, ProofreadRequest, ProofreadResponse, Draft } from './types';
+
+/**
+ * 下書きサマリー（一覧表示用）
+ */
+export interface DraftSummary {
+  id: string;
+  title: string;
+  category: string;
+  updatedAt: string;
+}
 
 /**
  * ナレッジを保存
@@ -90,4 +100,60 @@ export async function hideQuickInputWindow(): Promise<void> {
  */
 export async function renderMarkdown(input: KnowledgeInput): Promise<string> {
   return invoke<string>('render_markdown', { input });
+}
+
+/**
+ * Markdown文章を添削
+ */
+export async function proofreadMarkdown(content: string): Promise<string> {
+  return invoke<string>('proofread_markdown', { content });
+}
+
+/**
+ * 複数フィールドを一括添削
+ */
+export async function proofreadAllFields(request: ProofreadRequest): Promise<ProofreadResponse> {
+  return invoke<ProofreadResponse>('proofread_all_fields', { request });
+}
+
+/**
+ * 下書きを保存
+ */
+export async function saveDraft(draft: Draft): Promise<void> {
+  await invoke('save_draft', { draft });
+}
+
+/**
+ * 下書きを作成
+ */
+export async function createDraft(data: KnowledgeInput): Promise<Draft> {
+  return invoke<Draft>('create_draft', { data });
+}
+
+/**
+ * 下書きを読み込み
+ */
+export async function loadDraft(id: string): Promise<Draft> {
+  return invoke<Draft>('load_draft', { id });
+}
+
+/**
+ * 下書き一覧を取得
+ */
+export async function listDrafts(): Promise<DraftSummary[]> {
+  return invoke<DraftSummary[]>('list_drafts');
+}
+
+/**
+ * 下書きを削除
+ */
+export async function deleteDraft(id: string): Promise<void> {
+  await invoke('delete_draft', { id });
+}
+
+/**
+ * 下書きを更新
+ */
+export async function updateDraft(id: string, data: KnowledgeInput): Promise<Draft> {
+  return invoke<Draft>('update_draft', { id, data });
 }

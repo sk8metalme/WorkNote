@@ -7,7 +7,7 @@ const PROCEDURE_MAX_LENGTH = 10000;
 const NOTES_MAX_LENGTH = 5000;
 const LINKS_MAX_LENGTH = 5000;
 
-const VALID_CATEGORIES: Category[] = ['alerts', 'maintenance', 'troubleshooting'];
+const VALID_CATEGORIES: Category[] = ['alerts', 'maintenance', 'ops', 'troubleshooting', 'inquiry'];
 const VALID_SEVERITIES: Severity[] = ['low', 'medium', 'high', 'critical'];
 
 /**

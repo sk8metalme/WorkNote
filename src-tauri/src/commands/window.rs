@@ -1,5 +1,5 @@
 use tauri::{AppHandle, Manager};
-use crate::models::error::{ErrorInfo, Result, WorkNoteError};
+use crate::models::error::{ErrorInfo, WorkNoteError};
 
 /// Show quick-input window
 #[tauri::command]
@@ -36,8 +36,6 @@ pub fn hide_quick_input_window(app: AppHandle) -> std::result::Result<(), ErrorI
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_window_commands() {
         // Window commands require a running Tauri app

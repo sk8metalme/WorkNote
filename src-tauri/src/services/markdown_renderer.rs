@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::models::{KnowledgeInput, Result, WorkNoteError};
 use crate::services::FileGenerator;
 use pulldown_cmark::{html, Parser};
@@ -34,6 +35,7 @@ mod tests {
             procedure: "Test procedure".to_string(),
             notes: Some("Test notes".to_string()),
             related_links: Some("https://example.com".to_string()),
+            judgment: None,
         };
 
         let result = MarkdownRenderer::render_markdown(&input);

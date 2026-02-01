@@ -151,6 +151,14 @@ impl FileGenerator {
             content.push_str("\n");
         }
 
+        // 判断基準・判断軸（カテゴリ別）
+        if let Some(judgment) = &input.judgment {
+            if !judgment.is_empty() {
+                content.push_str("## 判断基準・判断軸\n\n");
+                content.push_str(&format!("{}\n\n", judgment));
+            }
+        }
+
         content
     }
 
@@ -207,6 +215,14 @@ impl FileGenerator {
             content.push_str(&format!("{}\n\n", links));
         } else {
             content.push_str("\n");
+        }
+
+        // 判断基準・判断軸（カテゴリ別）
+        if let Some(judgment) = &input.judgment {
+            if !judgment.is_empty() {
+                content.push_str("## 判断基準・判断軸\n\n");
+                content.push_str(&format!("{}\n\n", judgment));
+            }
         }
 
         // 対応履歴
@@ -352,6 +368,7 @@ mod tests {
             procedure: "1. プロセス一覧を確認\n2. 原因プロセスを特定\n3. 必要に応じて再起動".to_string(),
             notes: Some("再起動前にログを確認すること".to_string()),
             related_links: Some("https://example.com/cpu-troubleshooting".to_string()),
+            judgment: None,
         };
 
         let markdown = generator.generate_markdown(&input);
@@ -396,6 +413,7 @@ mod tests {
             procedure: "Test procedure".to_string(),
             notes: None,
             related_links: None,
+            judgment: None,
         };
 
         let file_path = generator.write_file(&input).unwrap();
@@ -430,6 +448,7 @@ mod tests {
             procedure: "Test".to_string(),
             notes: None,
             related_links: None,
+            judgment: None,
         };
 
         // 1回目: 通常のファイル名

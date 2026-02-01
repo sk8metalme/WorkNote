@@ -101,8 +101,6 @@ impl ShortcutManager {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_shortcut_manager_creation() {
         // ShortcutManager creation test

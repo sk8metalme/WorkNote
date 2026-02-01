@@ -36,6 +36,10 @@ pub enum WorkNoteError {
     #[error("Window not found: {0}")]
     WindowNotFoundError(String),
 
+    /// 添削エラー
+    #[error("Proofreading error: {0}")]
+    ProofreadError(String),
+
     /// I/Oエラー
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
@@ -65,6 +69,7 @@ impl From<WorkNoteError> for ErrorInfo {
             WorkNoteError::AuthError(_) => "AuthError",
             WorkNoteError::ShortcutError(_) => "ShortcutError",
             WorkNoteError::WindowNotFoundError(_) => "WindowNotFoundError",
+            WorkNoteError::ProofreadError(_) => "ProofreadError",
             WorkNoteError::IoError(_) => "IoError",
             WorkNoteError::JsonError(_) => "JsonError",
         };

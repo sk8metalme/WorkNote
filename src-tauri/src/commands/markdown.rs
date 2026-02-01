@@ -21,6 +21,7 @@ mod tests {
             procedure: "Test procedure".to_string(),
             notes: None,
             related_links: None,
+            judgment: None,
         };
 
         let result = render_markdown(input);

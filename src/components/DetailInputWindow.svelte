@@ -277,7 +277,7 @@
         }
         alert(message);
         // フォームクリア
-        input = { title: '', category: undefined, severity: undefined, symptoms: '', procedure: '', notes: '', relatedLinks: '' };
+        input = { title: '', category: '' as any, severity: '' as any, symptoms: '', procedure: '', notes: '', relatedLinks: '' };
         judgment = {};
         currentDraftId = null;
         previewHtml = '';
@@ -404,12 +404,18 @@
 
 <!-- 下書き一覧モーダル -->
 {#if showDraftList}
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="draft-list-title"
+  >
     <div class="bg-white rounded-lg shadow-xl w-3/5 max-h-4/5 flex flex-col">
       <div class="flex justify-between items-center p-4 border-b">
-        <h2 class="text-xl font-bold">下書き一覧</h2>
+        <h2 id="draft-list-title" class="text-xl font-bold">下書き一覧</h2>
         <button
           onclick={() => showDraftList = false}
+          aria-label="閉じる"
           class="text-gray-500 hover:text-gray-700"
         >
           ✕

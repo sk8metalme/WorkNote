@@ -50,11 +50,27 @@ impl DraftManager {
         Ok(())
     }
 
+    /// IDが安全なファイル名かどうかを検証
+    fn validate_id(id: &str) -> Result<()> {
+        if id.is_empty()
+            || id.contains('/')
+            || id.contains('\\')
+            || id.contains("..")
+            || id.contains('\0')
+        {
+            return Err(WorkNoteError::ValidationError(
+                "Invalid draft ID".to_string(),
+            ));
+        }
+        Ok(())
+    }
+
     /// 下書きを読み込み
     ///
     /// # Arguments
     /// * `id` - 下書きID
     pub fn load_draft(&self, id: &str) -> Result<Draft> {
+        Self::validate_id(id)?;
         let file_path = self.drafts_dir.join(format!("{}.json", id));
 
         if !file_path.exists() {
@@ -123,6 +139,7 @@ impl DraftManager {
     /// # Arguments
     /// * `id` - 下書きID
     pub fn delete_draft(&self, id: &str) -> Result<()> {
+        Self::validate_id(id)?;
         let file_path = self.drafts_dir.join(format!("{}.json", id));
 
         if !file_path.exists() {

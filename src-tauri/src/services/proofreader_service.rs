@@ -1,6 +1,6 @@
 use crate::models::error::{Result, WorkNoteError};
 use crate::models::proofreader::{ProofreadRequest, ProofreadResponse};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
 use wait_timeout::ChildExt;
@@ -79,6 +79,24 @@ impl ProofreadService {
     /// 一括添削（症状・対応手順・注意点を同時に添削）
     pub fn proofread_all(&self, request: &ProofreadRequest) -> Result<ProofreadResponse> {
         info!("Batch proofreading request received");
+
+        // 各フィールドのサイズを検証
+        let symptoms_length = request.symptoms.chars().count();
+        let procedure_length = request.procedure.chars().count();
+        let notes_length = request.notes.as_ref().map_or(0, |n| n.chars().count());
+        let total_length = symptoms_length + procedure_length + notes_length;
+
+        if total_length > MAX_CONTENT_LENGTH {
+            warn!(
+                total_length,
+                max_length = MAX_CONTENT_LENGTH,
+                "Batch content exceeds maximum length"
+            );
+            return Err(WorkNoteError::ValidationError(format!(
+                "Total content is too long. Maximum {} characters allowed.",
+                MAX_CONTENT_LENGTH
+            )));
+        }
 
         let start = Instant::now();
         let prompt = self.build_batch_prompt(request);
@@ -209,6 +227,8 @@ impl ProofreadService {
         let mut child = Command::new("claude")
             .arg("-p")
             .arg(prompt)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .spawn()
             .map_err(|e| {
                 if e.kind() == std::io::ErrorKind::NotFound {

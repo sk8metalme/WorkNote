@@ -3,7 +3,7 @@
 /**
  * カテゴリ種別
  */
-export type Category = 'alerts' | 'maintenance' | 'troubleshooting';
+export type Category = 'alerts' | 'maintenance' | 'ops' | 'troubleshooting' | 'inquiry';
 
 /**
  * 重要度
@@ -16,6 +16,28 @@ export type Severity = 'low' | 'medium' | 'high' | 'critical';
 export type CommitMode = 'direct' | 'feature-branch';
 
 /**
+ * カテゴリ別判断軸
+ */
+export interface CategoryJudgment {
+  alerts?: {
+    threshold?: string;           // 閾値・条件
+    escalationCriteria?: string;  // エスカレーション基準
+  };
+  ops?: {
+    workCriteria?: string;        // 作業基準
+    timing?: string;              // 実施タイミング
+  };
+  troubleshooting?: {
+    rootCauseProcess?: string;    // 原因特定プロセス
+    investigationSteps?: string;  // 調査手順
+  };
+  inquiry?: {
+    priorityCriteria?: string;    // 対応優先度基準
+    responseGuideline?: string;   // 回答指針
+  };
+}
+
+/**
  * ナレッジ入力データ
  */
 export interface KnowledgeInput {
@@ -26,6 +48,7 @@ export interface KnowledgeInput {
   procedure: string;
   notes?: string;
   relatedLinks?: string;
+  judgment?: string; // JSON文字列として保存
 }
 
 /**
@@ -63,14 +86,22 @@ export interface PreferencesConfig {
 }
 
 /**
+ * 添削設定
+ */
+export interface ProofreadConfig {
+  prompt: string;
+}
+
+/**
  * アプリケーション設定
  */
 export interface Config {
   version: number;
   git: GitConfig;
-  author: AuthorConfig;
+  author?: AuthorConfig; // 後方互換性のためオプショナル（git configから取得するため不要）
   shortcuts: ShortcutsConfig;
   preferences: PreferencesConfig;
+  proofread?: ProofreadConfig;
 }
 
 /**
@@ -130,4 +161,32 @@ export interface AppError {
   type: ErrorType;
   message: string;
   details?: string;
+}
+
+/**
+ * 一括添削リクエスト
+ */
+export interface ProofreadRequest {
+  symptoms: string;
+  procedure: string;
+  notes?: string;
+}
+
+/**
+ * 一括添削レスポンス
+ */
+export interface ProofreadResponse {
+  symptoms: string;
+  procedure: string;
+  notes?: string;
+}
+
+/**
+ * フィールド差分
+ */
+export interface FieldDiff {
+  field: 'symptoms' | 'procedure' | 'notes';
+  label: string;
+  original: string;
+  modified: string;
 }

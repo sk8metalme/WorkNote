@@ -35,6 +35,7 @@ mod tests {
             procedure: "Test procedure".to_string(),
             notes: Some("Test notes".to_string()),
             related_links: Some("https://example.com".to_string()),
+            judgment: None,
         };
 
         let result = MarkdownRenderer::render_markdown(&input);

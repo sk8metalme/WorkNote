@@ -82,7 +82,7 @@
 <div class="min-h-screen bg-white flex items-start justify-center pt-20">
   <div class="bg-white rounded-lg shadow-2xl p-6 w-[480px]">
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-lg font-bold text-gray-900">📝 WorkNote</h1>
+      <h1 class="text-lg font-bold text-ly-gray-900">📝 WorkNote</h1>
     </div>
 
     <form on:submit|preventDefault={handleQuickSave} class="space-y-4">
@@ -92,7 +92,7 @@
         <input
           type="text"
           bind:value={title}
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ly-green"
           placeholder="例: CPU高騰対応"
           autofocus
         />
@@ -107,12 +107,13 @@
           <label class="block text-sm font-medium mb-1">カテゴリ *</label>
           <select
             bind:value={category}
-            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ly-green"
           >
             <option value={undefined}>選択してください</option>
             <option value="alerts">alerts</option>
-            <option value="maintenance">maintenance</option>
+            <option value="ops">ops（運用）</option>
             <option value="troubleshooting">troubleshooting</option>
+            <option value="inquiry">inquiry（問合せ）</option>
           </select>
           {#if errors.category}
             <p class="text-red-600 text-sm mt-1">{errors.category}</p>
@@ -154,14 +155,14 @@
         <button
           type="button"
           on:click={handleDetailInput}
-          class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 text-sm"
+          class="flex-1 bg-ly-gray-100 text-ly-gray-700 px-4 py-2 rounded hover:bg-ly-gray-200 text-sm"
         >
           詳細入力へ →
         </button>
         <button
           type="submit"
           disabled={saving}
-          class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
+          class="flex-1 bg-ly-green text-white px-4 py-2 rounded hover:bg-ly-green/90 disabled:opacity-50 text-sm"
         >
           {saving ? '保存中...' : '💾 クイック保存'}
         </button>

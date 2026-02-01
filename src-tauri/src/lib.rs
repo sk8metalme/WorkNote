@@ -31,7 +31,14 @@ pub fn run() {
             commands::window::show_quick_input_window,
             commands::window::hide_quick_input_window,
             commands::markdown::render_markdown,
-            commands::proofreader::proofread_markdown
+            commands::proofreader::proofread_markdown,
+            commands::proofreader::proofread_all_fields,
+            commands::draft::save_draft,
+            commands::draft::create_draft,
+            commands::draft::load_draft,
+            commands::draft::list_drafts,
+            commands::draft::delete_draft,
+            commands::draft::update_draft
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

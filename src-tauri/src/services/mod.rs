@@ -1,4 +1,5 @@
 pub mod config_manager;
+pub mod draft_manager;
 pub mod file_generator;
 pub mod git_service;
 pub mod markdown_renderer;
@@ -7,6 +8,7 @@ pub mod shortcut_manager;
 
 // Re-export commonly used types
 pub use config_manager::ConfigManager;
+pub use draft_manager::DraftManager;
 pub use file_generator::FileGenerator;
 pub use git_service::GitService;
 pub use markdown_renderer::MarkdownRenderer;

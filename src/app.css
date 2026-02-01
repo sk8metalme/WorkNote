@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=LINE+Seed+JP:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'LINE Seed JP', sans-serif;
+  }
+}
+
+/* macOSのelastic scrolling（バウンス効果）を無効化 */
+html, body {
+  overscroll-behavior: contain;
+}

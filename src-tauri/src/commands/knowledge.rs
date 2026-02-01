@@ -21,11 +21,12 @@ pub async fn save_knowledge(
     let config_manager = ConfigManager::new(app_data_dir);
     let config = config_manager.load_config().map_err(ErrorInfo::from)?;
 
-    // FileGenerator初期化
+    // FileGenerator初期化（author名はgit configから取得）
+    let author_name = GitService::get_global_user_name().map_err(ErrorInfo::from)?;
     let file_generator = FileGenerator::new(
         PathBuf::from(&config.git.repository_path),
         config.git.save_path.clone(),
-        config.author.name.clone(),
+        author_name,
     );
 
     // GitService初期化
@@ -87,6 +88,7 @@ pub async fn quick_save_knowledge(
         procedure: "(クイック保存のため未入力)".to_string(),
         notes: None,
         related_links: None,
+        judgment: None,
     };
 
     // Reuse save_knowledge logic

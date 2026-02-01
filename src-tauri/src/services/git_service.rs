@@ -17,6 +17,52 @@ impl GitService {
         }
     }
 
+    /// グローバルgit configからユーザー名を取得
+    pub fn get_global_user_name() -> Result<String> {
+        let output = Command::new("git")
+            .args(&["config", "--global", "user.name"])
+            .output()
+            .map_err(|e| WorkNoteError::GitError(format!("Failed to execute git config: {}", e)))?;
+
+        if !output.status.success() {
+            return Err(WorkNoteError::ConfigError(
+                "Git user.name is not configured".to_string(),
+            ));
+        }
+
+        let name = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if name.is_empty() {
+            return Err(WorkNoteError::ConfigError(
+                "Git user.name is empty".to_string(),
+            ));
+        }
+
+        Ok(name)
+    }
+
+    /// グローバルgit configからユーザーメールを取得
+    pub fn get_global_user_email() -> Result<String> {
+        let output = Command::new("git")
+            .args(&["config", "--global", "user.email"])
+            .output()
+            .map_err(|e| WorkNoteError::GitError(format!("Failed to execute git config: {}", e)))?;
+
+        if !output.status.success() {
+            return Err(WorkNoteError::ConfigError(
+                "Git user.email is not configured".to_string(),
+            ));
+        }
+
+        let email = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if email.is_empty() {
+            return Err(WorkNoteError::ConfigError(
+                "Git user.email is empty".to_string(),
+            ));
+        }
+
+        Ok(email)
+    }
+
     /// Gitコマンドを実行
     fn execute_git(&self, args: &[&str]) -> Result<String> {
         let output = Command::new("git")

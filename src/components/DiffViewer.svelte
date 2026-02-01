@@ -40,10 +40,10 @@
     <h3 class="diff-title">添削結果</h3>
     <div class="diff-actions">
       <button class="btn-accept" onclick={handleAccept}>
-        すべて受け入れる
+        受け入れる
       </button>
       <button class="btn-reject" onclick={handleReject}>
-        すべて却下する
+        却下する
       </button>
     </div>
   </div>
@@ -69,7 +69,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    border: 1px solid #d0d7de;
+    border: 1px solid #D1D6DE;
     border-radius: 6px;
     overflow: hidden;
     background-color: #ffffff;
@@ -80,15 +80,15 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background-color: #f6f8fa;
-    border-bottom: 1px solid #d0d7de;
+    background-color: #F7F8FA;
+    border-bottom: 1px solid #D1D6DE;
   }
 
   .diff-title {
     margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: #1f2328;
+    color: #2A303A;
   }
 
   .diff-actions {
@@ -108,13 +108,13 @@
   }
 
   .btn-accept {
-    background-color: #1f883d;
+    background-color: #06C755;
     color: #ffffff;
     border-color: rgba(27, 31, 36, 0.15);
   }
 
   .btn-accept:hover {
-    background-color: #1a7f37;
+    background-color: #05b34c;
   }
 
   .btn-reject {
@@ -124,7 +124,7 @@
   }
 
   .btn-reject:hover {
-    background-color: #f3f4f6;
+    background-color: #E9ECF0;
   }
 
   .diff-content {
@@ -205,11 +205,11 @@
     }
 
     .btn-accept {
-      background-color: #238636;
+      background-color: #06C755;
     }
 
     .btn-accept:hover {
-      background-color: #2ea043;
+      background-color: #05b34c;
     }
 
     .btn-reject {

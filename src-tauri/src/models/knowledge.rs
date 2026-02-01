@@ -5,8 +5,10 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "lowercase")]
 pub enum Category {
     Alerts,
-    Maintenance,
+    Maintenance, // 後方互換性のため残す（新規はOpsを使用）
+    Ops,
     Troubleshooting,
+    Inquiry,
 }
 
 impl Category {
@@ -15,7 +17,9 @@ impl Category {
         match self {
             Category::Alerts => "alerts",
             Category::Maintenance => "maintenance",
+            Category::Ops => "ops",
             Category::Troubleshooting => "troubleshooting",
+            Category::Inquiry => "inquiry",
         }
     }
 }
@@ -55,6 +59,9 @@ pub struct KnowledgeInput {
     pub notes: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub related_links: Option<String>,
+    /// カテゴリ別判断軸（JSON文字列）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub judgment: Option<String>,
 }
 
 #[cfg(test)]
@@ -65,7 +72,9 @@ mod tests {
     fn test_category_as_str() {
         assert_eq!(Category::Alerts.as_str(), "alerts");
         assert_eq!(Category::Maintenance.as_str(), "maintenance");
+        assert_eq!(Category::Ops.as_str(), "ops");
         assert_eq!(Category::Troubleshooting.as_str(), "troubleshooting");
+        assert_eq!(Category::Inquiry.as_str(), "inquiry");
     }
 
     #[test]
@@ -93,6 +102,7 @@ mod tests {
             procedure: "Check processes".to_string(),
             notes: Some("Notes".to_string()),
             related_links: None,
+            judgment: None,
         };
 
         let json = serde_json::to_string(&input).unwrap();

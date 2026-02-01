@@ -97,6 +97,7 @@ export interface SaveKnowledgeResponse {
   filePath?: string;
   branch?: string;
   commitHash?: string;
+  prUrl?: string;
   error?: string;
 }
 

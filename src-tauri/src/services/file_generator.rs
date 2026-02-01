@@ -97,6 +97,63 @@ impl FileGenerator {
         }
     }
 
+    /// Markdownファイルを生成（プレビュー用：author情報なし）
+    ///
+    /// # Arguments
+    /// * `input` - ナレッジ入力データ
+    ///
+    /// # Returns
+    /// Markdown形式の文字列
+    pub fn generate_markdown_for_preview(input: &KnowledgeInput) -> String {
+        let today = Local::now().format("%Y-%m-%d").to_string();
+
+        let mut content = String::new();
+
+        // Frontmatter
+        content.push_str("---\n");
+        content.push_str(&format!("title: \"{}\"\n", Self::escape_yaml_string(&input.title)));
+        content.push_str(&format!("category: {}\n", input.category.as_str()));
+        content.push_str(&format!("severity: {}\n", input.severity.as_str()));
+        content.push_str("symptoms:\n");
+        content.push_str(&format!("  - \"{}\"\n", Self::escape_yaml_string(&input.symptoms)));
+        content.push_str("related_alerts: []\n");
+        content.push_str(&format!("last_updated: {}\n", today));
+        content.push_str("---\n\n");
+
+        // タイトル
+        content.push_str(&format!("# {}\n\n", input.title));
+
+        // 概要
+        content.push_str("## 概要\n\n");
+        content.push_str(&format!("{}\n\n", input.symptoms));
+
+        // 症状・検知条件
+        content.push_str("## 症状・検知条件\n\n");
+        content.push_str(&format!("{}\n\n", input.symptoms));
+
+        // 対応手順
+        content.push_str("## 対応手順\n\n");
+        content.push_str(&format!("{}\n\n", input.procedure));
+
+        // 注意点・落とし穴
+        content.push_str("## 注意点・落とし穴\n\n");
+        if let Some(notes) = &input.notes {
+            content.push_str(&format!("{}\n\n", notes));
+        } else {
+            content.push_str("\n");
+        }
+
+        // 関連リンク
+        content.push_str("## 関連リンク\n\n");
+        if let Some(links) = &input.related_links {
+            content.push_str(&format!("{}\n\n", links));
+        } else {
+            content.push_str("\n");
+        }
+
+        content
+    }
+
     /// Markdownファイルを生成
     ///
     /// # Arguments

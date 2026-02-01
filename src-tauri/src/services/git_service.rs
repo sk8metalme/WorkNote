@@ -1,4 +1,5 @@
 use crate::models::{Result, WorkNoteError};
+use chrono::Utc;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -103,6 +104,135 @@ impl GitService {
             "docs(worknote): add {}\n\nCategory: {}\nSeverity: {}",
             title, category, severity
         )
+    }
+
+    /// リモートURLからowner/repoを取得
+    fn get_remote_info(&self) -> Result<(String, String)> {
+        let remote_url = self.execute_git(&["remote", "get-url", "origin"])?;
+        let remote_url = remote_url.trim();
+
+        // Parse GitHub URL
+        // Examples:
+        // - https://github.com/owner/repo.git
+        // - git@github.com:owner/repo.git
+        let parts: Vec<&str> = if remote_url.starts_with("https://") {
+            // HTTPS URL
+            remote_url
+                .trim_start_matches("https://github.com/")
+                .trim_end_matches(".git")
+                .split('/')
+                .collect()
+        } else if remote_url.starts_with("git@") {
+            // SSH URL
+            remote_url
+                .trim_start_matches("git@github.com:")
+                .trim_end_matches(".git")
+                .split('/')
+                .collect()
+        } else {
+            return Err(WorkNoteError::GitError(
+                "Unsupported remote URL format".to_string(),
+            ));
+        };
+
+        if parts.len() < 2 {
+            return Err(WorkNoteError::GitError(
+                "Invalid remote URL format".to_string(),
+            ));
+        }
+
+        Ok((parts[0].to_string(), parts[1].to_string()))
+    }
+
+    /// GitHub PR作成URLを生成
+    fn generate_pr_url(&self, branch: &str) -> Result<String> {
+        let (owner, repo) = self.get_remote_info()?;
+        Ok(format!(
+            "https://github.com/{}/{}/compare/{}",
+            owner, repo, branch
+        ))
+    }
+
+    /// タイトルをブランチ名に変換（kebab-case + タイムスタンプ）
+    fn sanitize_branch_name(&self, title: &str) -> String {
+        let timestamp = chrono::Utc::now().format("%Y%m%d-%H%M%S");
+        let sanitized = title
+            .to_lowercase()
+            .chars()
+            .filter_map(|c| {
+                if c.is_ascii_alphanumeric() {
+                    Some(c)
+                } else if c.is_whitespace() || c.is_ascii_punctuation() {
+                    Some('-')
+                } else {
+                    None
+                }
+            })
+            .collect::<String>()
+            .split('-')
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join("-");
+
+        // 日本語タイトルなど、ASCII文字がない場合は"knowledge"をデフォルトとして使用
+        let prefix = if sanitized.is_empty() {
+            "knowledge"
+        } else {
+            &sanitized
+        };
+
+        format!("feature/worknote-{}-{}", prefix, timestamp)
+    }
+
+    /// PR作成モード: featureブランチにコミット＆プッシュ
+    pub fn commit_and_push_pr(
+        &self,
+        file_path: &Path,
+        title: &str,
+        category: &str,
+        severity: &str,
+    ) -> Result<(String, String)> {
+        // デフォルトブランチから最新を取得
+        self.pull_latest()?;
+
+        // featureブランチ名を生成
+        let branch_name = self.sanitize_branch_name(title);
+
+        // featureブランチを作成してチェックアウト
+        self.execute_git(&["checkout", "-b", &branch_name])?;
+
+        // ファイル名を相対パスに変換
+        let relative_path = file_path
+            .strip_prefix(&self.repository_path)
+            .map_err(|e| WorkNoteError::FileError(format!("Invalid file path: {}", e)))?;
+
+        // 相対パスをUTF-8文字列に変換
+        let relative_path_str = relative_path
+            .to_str()
+            .ok_or_else(|| WorkNoteError::FileError("Invalid UTF-8 file path".to_string()))?;
+
+        // Git add
+        self.execute_git(&["add", relative_path_str])?;
+
+        // コミットメッセージ生成
+        let message = self.format_commit_message(title, category, severity);
+
+        // Git commit
+        self.execute_git(&["commit", "-m", &message])?;
+
+        // Git push (featureブランチ)
+        self.execute_git(&["push", "origin", &branch_name])?;
+
+        // 最新のコミットハッシュを取得
+        let hash = self.execute_git(&["rev-parse", "HEAD"])?;
+
+        // PR URL生成
+        let pr_url = self.generate_pr_url(&branch_name)?;
+
+        // デフォルトブランチに戻す（次回のDirect modeで誤ったブランチに コミットしないため）
+        self.execute_git(&["checkout", &self.default_branch])?;
+
+        Ok((hash.trim().to_string(), pr_url))
     }
 }
 

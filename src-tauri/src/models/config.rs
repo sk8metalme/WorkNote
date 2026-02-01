@@ -62,7 +62,7 @@ pub struct ShortcutsConfig {
 impl Default for ShortcutsConfig {
     fn default() -> Self {
         ShortcutsConfig {
-            quick_input: "CommandOrControl+Shift+K".to_string(),
+            quick_input: "CommandOrControl+J".to_string(),
         }
     }
 }
@@ -120,7 +120,7 @@ mod tests {
         assert_eq!(config.git.default_branch, "main");
         assert_eq!(config.git.save_path, "docs/runbooks");
         assert_eq!(config.git.commit_mode, CommitMode::Direct);
-        assert_eq!(config.shortcuts.quick_input, "CommandOrControl+Shift+K");
+        assert_eq!(config.shortcuts.quick_input, "CommandOrControl+J");
         assert!(config.preferences.show_in_menu_bar);
         assert!(config.preferences.show_notifications);
         assert!(!config.preferences.launch_at_login);

@@ -1,0 +1,20 @@
+{
+  "projectName": "worknote",
+  "phase": "tasks-generated",
+  "currentPhase": "phase3-ai-proofreader",
+  "createdAt": "2026-02-01T00:00:00Z",
+  "updatedAt": "2026-02-01T00:00:00Z",
+  "description": "WorkNote - AI 文章添削アシスタント機能（Phase 3）",
+  "features": [
+    {
+      "name": "phase3-ai-proofreader",
+      "description": "Claude Code を活用した AI 文章添削機能",
+      "status": "tasks-generated",
+      "startedAt": "2026-02-01T00:00:00Z",
+      "designCompletedAt": "2026-02-01T00:00:00Z",
+      "tasksGeneratedAt": "2026-02-01T00:00:00Z",
+      "totalTasks": 7,
+      "estimatedDays": "10-14"
+    }
+  ]
+}

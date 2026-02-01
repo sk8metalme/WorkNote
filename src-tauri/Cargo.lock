@@ -3569,6 +3569,7 @@ dependencies = [
  "tauri-plugin-global-shortcut",
  "tauri-plugin-opener",
  "thiserror 2.0.18",
+ "tracing",
 ]
 
 [[package]]

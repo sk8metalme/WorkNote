@@ -30,7 +30,8 @@ pub fn run() {
             commands::config::save_config,
             commands::window::show_quick_input_window,
             commands::window::hide_quick_input_window,
-            commands::markdown::render_markdown
+            commands::markdown::render_markdown,
+            commands::proofreader::proofread_markdown
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

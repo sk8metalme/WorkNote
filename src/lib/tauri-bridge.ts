@@ -91,3 +91,10 @@ export async function hideQuickInputWindow(): Promise<void> {
 export async function renderMarkdown(input: KnowledgeInput): Promise<string> {
   return invoke<string>('render_markdown', { input });
 }
+
+/**
+ * Markdown文章を添削
+ */
+export async function proofreadMarkdown(content: string): Promise<string> {
+  return invoke<string>('proofread_markdown', { content });
+}

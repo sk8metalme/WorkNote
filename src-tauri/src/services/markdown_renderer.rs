@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::models::{KnowledgeInput, Result, WorkNoteError};
 use crate::services::FileGenerator;
 use pulldown_cmark::{html, Parser};

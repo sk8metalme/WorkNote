@@ -120,7 +120,8 @@ export type ErrorType =
   | 'ValidationError'
   | 'ConfigError'
   | 'NetworkError'
-  | 'AuthError';
+  | 'AuthError'
+  | 'ProofreadError';
 
 /**
  * アプリケーションエラー

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { validateKnowledgeInput } from '$lib/validation';
-  import { saveKnowledge, renderMarkdown } from '$lib/tauri-bridge';
+  import { saveKnowledge, renderMarkdown, proofreadMarkdown } from '$lib/tauri-bridge';
   import ErrorDialog from './ErrorDialog.svelte';
   import PreviewPane from './PreviewPane.svelte';
+  import DiffViewer from './DiffViewer.svelte';
   import type { KnowledgeInput, AppError } from '$lib/types';
 
   let input = $state<Partial<KnowledgeInput>>({
@@ -21,6 +22,14 @@
   let previewHtml = $state('');
   let previewLoading = $state(false);
   let debounceTimer: number | null = null;
+
+  // AI添削関連の状態
+  type ProofreadableField = 'symptoms' | 'procedure' | 'notes';
+  let proofreadingField = $state<ProofreadableField | null>(null);
+  let proofreadOriginal = $state('');
+  let proofreadModified = $state('');
+  let showDiffViewer = $state(false);
+  let proofreading = $state(false);
 
   // デバウンス付きプレビュー更新
   async function updatePreview() {
@@ -71,6 +80,46 @@
     };
   });
 
+  async function handleProofread(field: ProofreadableField) {
+    const content = input[field] || '';
+
+    if (!content.trim()) {
+      alert('添削する文章を入力してください');
+      return;
+    }
+
+    proofreading = true;
+    proofreadingField = field;
+    proofreadOriginal = content;
+
+    try {
+      const result = await proofreadMarkdown(content);
+      proofreadModified = result;
+      showDiffViewer = true;
+    } catch (e: any) {
+      error = { type: 'ProofreadError', message: e.message || '添削に失敗しました' };
+    } finally {
+      proofreading = false;
+    }
+  }
+
+  function handleAcceptProofread() {
+    if (proofreadingField) {
+      input[proofreadingField] = proofreadModified;
+    }
+    showDiffViewer = false;
+    proofreadingField = null;
+    proofreadOriginal = '';
+    proofreadModified = '';
+  }
+
+  function handleRejectProofread() {
+    showDiffViewer = false;
+    proofreadingField = null;
+    proofreadOriginal = '';
+    proofreadModified = '';
+  }
+
   async function handleSave() {
     const validation = validateKnowledgeInput(input);
 
@@ -109,7 +158,7 @@
   <div class="flex-1 overflow-y-auto p-6">
     <h1 class="text-2xl font-bold mb-6">ナレッジ入力</h1>
 
-    <form on:submit|preventDefault={handleSave} class="space-y-4">
+    <form onsubmit={(e) => { e.preventDefault(); handleSave(); }} class="space-y-4">
       <div>
         <label class="block text-sm font-medium mb-1">タイトル *</label>
         <input type="text" bind:value={input.title} class="w-full border rounded px-3 py-2" />
@@ -142,19 +191,49 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">症状 *</label>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-sm font-medium">症状 *</label>
+          <button
+            type="button"
+            onclick={() => handleProofread('symptoms')}
+            disabled={proofreading}
+            class="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
+          >
+            {proofreading && proofreadingField === 'symptoms' ? 'AI添削中...' : 'AI添削'}
+          </button>
+        </div>
         <textarea bind:value={input.symptoms} rows="3" class="w-full border rounded px-3 py-2"></textarea>
         {#if errors.symptoms}<p class="text-red-600 text-sm">{errors.symptoms}</p>{/if}
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">対応手順 *</label>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-sm font-medium">対応手順 *</label>
+          <button
+            type="button"
+            onclick={() => handleProofread('procedure')}
+            disabled={proofreading}
+            class="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
+          >
+            {proofreading && proofreadingField === 'procedure' ? 'AI添削中...' : 'AI添削'}
+          </button>
+        </div>
         <textarea bind:value={input.procedure} rows="6" class="w-full border rounded px-3 py-2"></textarea>
         {#if errors.procedure}<p class="text-red-600 text-sm">{errors.procedure}</p>{/if}
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">注意点・落とし穴</label>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-sm font-medium">注意点・落とし穴</label>
+          <button
+            type="button"
+            onclick={() => handleProofread('notes')}
+            disabled={proofreading}
+            class="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
+          >
+            {proofreading && proofreadingField === 'notes' ? 'AI添削中...' : 'AI添削'}
+          </button>
+        </div>
         <textarea bind:value={input.notes} rows="3" class="w-full border rounded px-3 py-2"></textarea>
       </div>
 
@@ -176,3 +255,28 @@
 </div>
 
 <ErrorDialog {error} onClose={() => error = null} />
+
+<!-- AI添削結果モーダル -->
+{#if showDiffViewer}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-4/5 h-4/5 flex flex-col">
+      <div class="flex justify-between items-center p-4 border-b">
+        <h2 class="text-xl font-bold">AI添削結果</h2>
+        <button
+          onclick={handleRejectProofread}
+          class="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="flex-1 overflow-hidden">
+        <DiffViewer
+          original={proofreadOriginal}
+          modified={proofreadModified}
+          onAccept={handleAcceptProofread}
+          onReject={handleRejectProofread}
+        />
+      </div>
+    </div>
+  </div>
+{/if}

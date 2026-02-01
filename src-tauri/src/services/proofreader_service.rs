@@ -83,9 +83,8 @@ impl ProofreadService {
 
     /// Claude CLI を実行（LI-003 対応: 親切なエラーメッセージ）
     fn execute_claude_cli(&self, prompt: &str) -> Result<String> {
-        let output = Command::new("claude-code")
-            .arg("chat")
-            .arg("--input")
+        let output = Command::new("claude")
+            .arg("-p")
             .arg(prompt)
             .output()
             .map_err(|e| {
@@ -94,12 +93,12 @@ impl ProofreadService {
                         "Claude CLI が見つかりません。以下の手順でインストールしてください：\n\
                          1. https://claude.ai/code をアクセス\n\
                          2. CLI をダウンロード・インストール\n\
-                         3. claude-code --version でインストール確認"
+                         3. claude --version でインストール確認"
                             .to_string(),
                     )
                 } else {
                     WorkNoteError::ProofreadError(format!(
-                        "Failed to execute claude-code: {}",
+                        "Failed to execute claude: {}",
                         e
                     ))
                 }
@@ -107,7 +106,7 @@ impl ProofreadService {
 
         if !output.status.success() {
             return Err(WorkNoteError::ProofreadError(format!(
-                "claude-code exited with status: {}",
+                "claude exited with status: {}",
                 output.status
             )));
         }

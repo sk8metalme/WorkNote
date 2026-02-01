@@ -24,8 +24,17 @@ pub async fn proofread_markdown(
     // カスタムプロンプトを取得（存在しない場合はNone）
     let custom_prompt = config.proofread.map(|p| p.prompt);
 
-    let service = ProofreadService::with_custom_prompt(custom_prompt);
-    service.proofread(&content).map_err(ErrorInfo::from)
+    tokio::task::spawn_blocking(move || {
+        let service = ProofreadService::with_custom_prompt(custom_prompt);
+        service.proofread(&content)
+    })
+    .await
+    .map_err(|e| ErrorInfo {
+        error_type: "ProofreadError".to_string(),
+        message: format!("Task join error: {}", e),
+        details: None,
+    })?
+    .map_err(ErrorInfo::from)
 }
 
 #[tauri::command]
@@ -49,8 +58,17 @@ pub async fn proofread_all_fields(
     // カスタムプロンプトを取得（存在しない場合はNone）
     let custom_prompt = config.proofread.map(|p| p.prompt);
 
-    let service = ProofreadService::with_custom_prompt(custom_prompt);
-    service.proofread_all(&request).map_err(ErrorInfo::from)
+    tokio::task::spawn_blocking(move || {
+        let service = ProofreadService::with_custom_prompt(custom_prompt);
+        service.proofread_all(&request)
+    })
+    .await
+    .map_err(|e| ErrorInfo {
+        error_type: "ProofreadError".to_string(),
+        message: format!("Task join error: {}", e),
+        details: None,
+    })?
+    .map_err(ErrorInfo::from)
 }
 
 #[cfg(test)]

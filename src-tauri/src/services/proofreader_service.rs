@@ -3,6 +3,7 @@ use crate::models::proofreader::{ProofreadRequest, ProofreadResponse};
 use std::process::Command;
 use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
+use wait_timeout::ChildExt;
 
 const MAX_CONTENT_LENGTH: usize = 10_000;
 
@@ -17,7 +18,6 @@ const DEFAULT_PROMPT: &str = r#"あなたは Markdown 文章の添削アシス�
 添削後の文章を Markdown 形式で返してください。変更箇所のみを返すのではなく、全文を返してください。"#;
 
 pub struct ProofreadService {
-    #[allow(dead_code)]
     timeout: Duration,
     custom_prompt: Option<String>,
 }
@@ -38,15 +38,13 @@ impl ProofreadService {
     }
 
     pub fn proofread(&self, content: &str) -> Result<String> {
-        info!(
-            content_length = content.len(),
-            "Proofreading request received"
-        );
+        let content_length = content.chars().count();
+        info!(content_length, "Proofreading request received");
 
         // 入力サイズ制限チェック（LI-001 対応）
-        if content.len() > MAX_CONTENT_LENGTH {
+        if content_length > MAX_CONTENT_LENGTH {
             warn!(
-                content_length = content.len(),
+                content_length,
                 max_length = MAX_CONTENT_LENGTH,
                 "Content exceeds maximum length"
             );
@@ -206,12 +204,12 @@ impl ProofreadService {
         )
     }
 
-    /// Claude CLI を実行（LI-003 対応: 親切なエラーメッセージ）
+    /// Claude CLI を実行（LI-003 対応: 親切なエラーメッセージ、タイムアウト機構）
     fn execute_claude_cli(&self, prompt: &str) -> Result<String> {
-        let output = Command::new("claude")
+        let mut child = Command::new("claude")
             .arg("-p")
             .arg(prompt)
-            .output()
+            .spawn()
             .map_err(|e| {
                 if e.kind() == std::io::ErrorKind::NotFound {
                     WorkNoteError::ProofreadError(
@@ -229,18 +227,42 @@ impl ProofreadService {
                 }
             })?;
 
-        if !output.status.success() {
-            return Err(WorkNoteError::ProofreadError(format!(
-                "claude exited with status: {}",
-                output.status
-            )));
+        // タイムアウト付きでプロセスの完了を待つ
+        match child.wait_timeout(self.timeout).map_err(|e| {
+            WorkNoteError::ProofreadError(format!("Failed to wait for claude process: {}", e))
+        })? {
+            Some(status) => {
+                if !status.success() {
+                    return Err(WorkNoteError::ProofreadError(format!(
+                        "claude exited with status: {}",
+                        status
+                    )));
+                }
+
+                // プロセスが正常終了した場合、出力を読み取る
+                let output = child.wait_with_output().map_err(|e| {
+                    WorkNoteError::ProofreadError(format!("Failed to read claude output: {}", e))
+                })?;
+
+                let result = String::from_utf8(output.stdout).map_err(|e| {
+                    WorkNoteError::ProofreadError(format!("Failed to parse claude output: {}", e))
+                })?;
+
+                Ok(result.trim().to_string())
+            }
+            None => {
+                // タイムアウト発生時はプロセスを強制終了
+                child.kill().map_err(|e| {
+                    WorkNoteError::ProofreadError(format!("Failed to kill timed-out process: {}", e))
+                })?;
+                child.wait().ok(); // クリーンアップ
+
+                Err(WorkNoteError::ProofreadError(format!(
+                    "Claude CLI timed out after {} seconds. The operation took too long to complete.",
+                    self.timeout.as_secs()
+                )))
+            }
         }
-
-        let result = String::from_utf8(output.stdout).map_err(|e| {
-            WorkNoteError::ProofreadError(format!("Failed to parse claude-code output: {}", e))
-        })?;
-
-        Ok(result.trim().to_string())
     }
 }
 

@@ -456,12 +456,18 @@
 
 <!-- AI添削結果モーダル -->
 {#if showDiffViewer}
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="diff-viewer-title"
+  >
     <div class="bg-white rounded-lg shadow-xl w-4/5 h-4/5 flex flex-col">
       <div class="flex justify-between items-center p-4 border-b">
-        <h2 class="text-xl font-bold">AI一括添削結果</h2>
+        <h2 id="diff-viewer-title" class="text-xl font-bold">AI一括添削結果</h2>
         <button
           onclick={() => showDiffViewer = false}
+          aria-label="閉じる"
           class="text-gray-500 hover:text-gray-700"
         >
           ✕

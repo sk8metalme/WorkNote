@@ -500,8 +500,8 @@ Phase 4 以降で以下の拡張を検討：
 ## 参照
 
 - **要件定義書**: `phase3-requirements.md`
-- **C4 モデル**: https://c4model.com/
-- **Mermaid 構文**: https://mermaid.js.org/
+- **C4 モデル**: [C4 Model](https://c4model.com/)
+- **Mermaid 構文**: [Mermaid](https://mermaid.js.org/)
 
 ---
 

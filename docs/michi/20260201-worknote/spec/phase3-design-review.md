@@ -57,18 +57,18 @@
 
 **評価**: 良好
 
-| OWASP Top 10 項目 | 対策状況 | 備考 |
-|------------------|---------|------|
-| A01: Broken Access Control | N/A | ローカルアプリケーションのため該当なし |
-| A02: Cryptographic Failures | ✅ | Claude CLI が HTTPS で通信 |
-| A03: Injection | ⚠️ | プロンプトインジェクション対策が必要（LI-002） |
-| A04: Insecure Design | ✅ | 設計は適切 |
-| A05: Security Misconfiguration | ✅ | API キーは環境変数で管理 |
-| A06: Vulnerable Components | ✅ | 依存関係は最新版を使用予定 |
-| A07: Authentication Failures | N/A | Claude CLI が認証を担当 |
-| A08: Software and Data Integrity | ✅ | データ整合性は保たれている |
-| A09: Logging Failures | ⚠️ | ログ設計が不足（REC-003） |
-| A10: Server-Side Request Forgery | N/A | 該当なし |
+| OWASP Top 10 項目                | 対策状況 | 備考                                         |
+| -------------------------------- | :------: | -------------------------------------------- |
+| A01: Broken Access Control       |   N/A    | ローカルアプリケーションのため該当なし       |
+| A02: Cryptographic Failures      |    ✅    | Claude CLI が HTTPS で通信                   |
+| A03: Injection                   |    ⚠️    | プロンプトインジェクション対策が必要（LI-002） |
+| A04: Insecure Design             |    ✅    | 設計は適切                                   |
+| A05: Security Misconfiguration   |    ✅    | API キーは環境変数で管理                     |
+| A06: Vulnerable Components       |    ✅    | 依存関係は最新版を使用予定                   |
+| A07: Authentication Failures     |   N/A    | Claude CLI が認証を担当                      |
+| A08: Software and Data Integrity |    ✅    | データ整合性は保たれている                   |
+| A09: Logging Failures            |    ⚠️    | ログ設計が不足（REC-003）                    |
+| A10: Server-Side Request Forgery |   N/A    | 該当なし                                     |
 
 ### ⚠️ データ暗号化
 
